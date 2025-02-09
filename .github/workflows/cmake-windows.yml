@@ -20,8 +20,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    env:
-      RELTAG : win-${{ github.run_id }}-${{ github.run_attempt }}
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
@@ -84,4 +82,4 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: "game/*"
-        tag: ${{ RELTAG }}
+        tag: win-${{ github.run_id }}-${{ github.run_attempt }}
