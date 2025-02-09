@@ -3,6 +3,13 @@
 name: CMake on Windows
 
 on:
+  workflow_dispatch:
+    inputs:
+      debugger_keyword:
+        description: "Type anything here. (OPTIONAL)"
+        required: false
+        type: string
+        default: ""
   push:
     branches: [ "master" ]
     paths-ignore:
