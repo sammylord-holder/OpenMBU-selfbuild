@@ -81,5 +81,5 @@ jobs:
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: game
+        artifacts: "game/*"
         tag: windows-OpenMBU-${{ matrix.artifact_name }}
