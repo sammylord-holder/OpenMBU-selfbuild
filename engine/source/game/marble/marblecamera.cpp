@@ -5,6 +5,7 @@
 
 #include "marble.h"
 #include "game/gameProcess.h"
+#include "game/fx/cameraFXMgr.h"
 
 //----------------------------------------------------------------------------
 
@@ -346,6 +347,9 @@ void Marble::getOOBCamera(MatrixF* mat)
     getLookMatrix(&camMat);
     Point3F camUpDir(camMat[2], camMat[6], camMat[10]);
     Point3F matPos(mRenderObjToWorld[3], mRenderObjToWorld[7], mRenderObjToWorld[11]);
+#ifdef MBXP_DYNAMIC_CAMERA
+    matPos += mCameraPosition;
+#endif
     float radius = mRadius + RADIUS_FOR_CAMERA;
     Point3F scale(camMat[2] * radius, camMat[6] * radius, camMat[10] * radius);
     matPos += scale;
@@ -480,8 +484,13 @@ void Marble::getCameraTransform(F32* pos, MatrixF* mat)
 
     resetPlatformsForCamera();
 
+#ifdef MBXP_DYNAMIC_CAMERA
+    mLastCamPos = position + mCameraPosition;
+    mOOBCamPos = position + mCameraPosition;
+#else
     mLastCamPos = position;
     mOOBCamPos = position;
+#endif
     mCameraInit = true;
 
     Point3F camForwardDir = startCam - position;
@@ -498,7 +507,19 @@ void Marble::getCameraTransform(F32* pos, MatrixF* mat)
     mat->setColumn(0, camSideDir);
     mat->setColumn(1, camForwardDir);
     mat->setColumn(2, camUpDir);
+#ifdef MBXP_DYNAMIC_CAMERA
+    mat->setColumn(3, mCameraPosition + position);
+#else
     mat->setColumn(3, position);
+#endif
+
+#ifdef MBXP_CAMERA_SHAKE
+    MatrixF camFX = gCamFXMgr.getTrans();
+    if (!camFX.isIdentity())
+    {
+        mat->mul(camFX);
+    }
+#endif
 }
 
 ConsoleMethod(Marble, cameraLookAtPt, void, 3, 3, "(point)")

@@ -230,6 +230,8 @@ private:
 
     F32 mSize;
 
+    Point3F mCameraPosition;
+
 public:
     DECLARE_CONOBJECT(Marble);
 
@@ -358,6 +360,10 @@ public:
     static Vector<Marble*> marbles;
     static ConcretePolyList polyList;
 
+#ifdef MBXP_EMOTIVES
+    static bool smUseEmotives;
+#endif
+
 #ifdef MB_PHYSICS_SWITCHABLE
     static bool smTrapLaunch;
 #endif
@@ -395,7 +401,7 @@ private:
         MaxSounds,
     };
 
-    SFXProfile* sound[13];
+    SFXProfile* sound[MaxSounds];
     F32 maxRollVelocity;
     F32 minVelocityBounceSoft;
     F32 minVelocityBounceHard;
@@ -423,6 +429,8 @@ private:
     U32 startModeTime;
     U32 stopModeTime;
     F32 minBounceSpeed;
+    F32 minMediumBounceSpeed;
+    F32 minHardBounceSpeed;
     F32 minTrailSpeed;
     ParticleEmitterData* bounceEmitter;
     ParticleEmitterData* trailEmitter;
@@ -433,6 +441,28 @@ private:
     U32 maxNaturalBlastRecharge;
     DecalData* mDecalData;
     S32 mDecalID;
+
+    F32 cameraLag;
+    F32 cameraDecay;
+
+    F32 cameraLagMaxOffset;
+
+    Point3F SoftBounceImpactShakeFreq;
+    Point3F SoftBounceImpactShakeAmp;
+    F32 SoftBounceImpactShakeDuration;
+    F32 SoftBounceImpactShakeFalloff;
+
+    Point3F MediumBounceImpactShakeFreq;
+    Point3F MediumBounceImpactShakeAmp;
+    F32 MediumBounceImpactShakeDuration;
+    F32 MediumBounceImpactShakeFalloff;
+
+    Point3F HardBounceImpactShakeFreq;
+    Point3F HardBounceImpactShakeAmp;
+    F32 HardBounceImpactShakeDuration;
+    F32 HardBounceImpactShakeFalloff;
+
+    F32 slipEmotiveThreshold;
 
 public:
     DECLARE_CONOBJECT(MarbleData);

@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------------------
 
 #include "marble.h"
+#include "game/fx/cameraFXMgr.h"
 #include "sfx/sfxSystem.h"
 
 //----------------------------------------------------------------------------
@@ -381,7 +382,83 @@ void Marble::velocityCancel(bool surfaceSlide, bool noBounce, bool& bouncedYet, 
                         Point3D vAtC = sVel + mCross(mOmega, -contact->normal * mRadius);
                         F64 normalVel = -mDot(contact->normal, sVel);
 
-                        bounceEmitter(sVel.len() * restitution, contact->normal);
+                        F32 bounceSpeed = sVel.len() * restitution;
+                        Point3F bounceNormal = contact->normal;
+#if defined(MBXP_CAMERA_SHAKE) || defined(MBXP_EMOTIVES)
+#ifdef MB_ULTRA_PREVIEWS
+                        if (isGhost() || gSPMode)
+#else
+                        if (isGhost())
+#endif
+                        {
+                            U32 bounceType = 0;
+                            if (mDataBlock->minHardBounceSpeed <= bounceSpeed)
+                                bounceType = 3;
+                            else if (mDataBlock->minMediumBounceSpeed <= bounceSpeed)
+                                bounceType = 2;
+                            else if (mDataBlock->minBounceSpeed <= bounceSpeed)
+                                bounceType = 1;
+
+                            if (bounceType > 0 && !mBounceEmitDelay)
+                            {
+                                bounceEmitter(bounceSpeed, bounceNormal);
+                                mBounceEmitDelay = 300;
+#ifdef MBXP_CAMERA_SHAKE
+                                auto cameraShake = new CameraShake;
+#endif
+
+                                if (bounceType == 1)
+                                {
+#ifdef MBXP_EMOTIVES
+                                    if (smUseEmotives)
+                                        Con::executef(this, 2, "onEmotive", "SoftBounce");
+#endif
+
+#ifdef MBXP_CAMERA_SHAKE
+                                    cameraShake->setDuration(mDataBlock->SoftBounceImpactShakeDuration);
+                                    cameraShake->setFrequency(mDataBlock->SoftBounceImpactShakeFreq);
+                                    cameraShake->setAmplitude(mDataBlock->SoftBounceImpactShakeAmp);
+                                    cameraShake->setFalloff(mDataBlock->SoftBounceImpactShakeFalloff);
+#endif
+                                }
+                                else if (bounceType == 2)
+                                {
+#ifdef MBXP_EMOTIVES
+                                    if (smUseEmotives)
+                                        Con::executef(this, 2, "onEmotive", "MediumBounce");
+#endif
+
+#ifdef MBXP_CAMERA_SHAKE
+                                    cameraShake->setDuration(mDataBlock->MediumBounceImpactShakeDuration);
+                                    cameraShake->setFrequency(mDataBlock->MediumBounceImpactShakeFreq);
+                                    cameraShake->setAmplitude(mDataBlock->MediumBounceImpactShakeAmp);
+                                    cameraShake->setFalloff(mDataBlock->MediumBounceImpactShakeFalloff);
+#endif
+                                }
+                                else if (bounceType == 3)
+                                {
+#ifdef MBXP_EMOTIVES
+                                    if (smUseEmotives)
+                                        Con::executef(this, 2, "onEmotive", "HardBounce");
+#endif
+
+#ifdef MBXP_CAMERA_SHAKE
+                                    cameraShake->setDuration(mDataBlock->HardBounceImpactShakeDuration);
+                                    cameraShake->setFrequency(mDataBlock->HardBounceImpactShakeFreq);
+                                    cameraShake->setAmplitude(mDataBlock->HardBounceImpactShakeAmp);
+                                    cameraShake->setFalloff(mDataBlock->HardBounceImpactShakeFalloff);
+#endif
+                                }
+
+#ifdef MBXP_CAMERA_SHAKE
+                                cameraShake->init();
+                                gCamFXMgr.addFX(cameraShake);
+#endif
+                            }
+                        }
+#else
+                        bounceEmitter(bounceSpeed, bounceNormal);
+#endif
 
                         vAtC -= contact->normal * mDot(contact->normal, sVel);
 
